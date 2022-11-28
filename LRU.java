@@ -1,94 +1,41 @@
-import java.io.*;
 import java.util.*;
 
 public class LRU {
 
-    public static void main(String[] args) throws IOException 
-    {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        int frames,pointer = 0, hit = 0, fault = 0,ref_len;
-        Boolean isFull = false;
-        int buffer[];
-        ArrayList<Integer> stack = new ArrayList<Integer>();
-        int reference[];
-        int mem_layout[][];
-        
-        System.out.println("Please enter the number of Frames: ");
-        frames = Integer.parseInt(br.readLine());
-        
-        System.out.println("Please enter the length of the Reference string: ");
-        ref_len = Integer.parseInt(br.readLine());
-        
-        reference = new int[ref_len];
-        mem_layout = new int[ref_len][frames];
-        buffer = new int[frames];
-        for(int j = 0; j < frames; j++)
-                buffer[j] = -1;
-        
-        System.out.println("Please enter the reference string: ");
-        for(int i = 0; i < ref_len; i++)
-        {
-            reference[i] = Integer.parseInt(br.readLine());
-        }
-        System.out.println();
-        for(int i = 0; i < ref_len; i++)
-        {
-            if(stack.contains(reference[i]))
-            {
-             stack.remove(stack.indexOf(reference[i]));
+    public static void lru_page_replace(int page_order[], int page_frame) {
+        LinkedList<Integer> lru_list = new LinkedList<Integer>();
+        double hits = 0, miss = 0, deci = 100.0;
+        int n = page_order.length;
+        System.out.println("---------------------------");
+        for (int i = 0; i < n; i++) {
+            int ele = page_order[i];
+            int index = lru_list.indexOf(ele);
+            System.out.println("Element: " + ele);
+            if (lru_list.isEmpty() || lru_list.size() < page_frame) {
+                lru_list.add(0, ele);
+                System.out.println("Element added: " + ele);
+            } else if (index != -1) {
+                lru_list.remove(index);
+                lru_list.add(0, ele);
+                System.out.println("Hit: " + ele);
+                hits += 1;
+            } else {
+                System.out.println("Element removed: " + lru_list.remove(lru_list.size() - 1));
+                lru_list.add(0, ele);
+                System.out.println("Element added: " + ele);
             }
-            stack.add(reference[i]);
-            int search = -1;
-            for(int j = 0; j < frames; j++)
-            {
-                if(buffer[j] == reference[i])
-                {
-                    search = j;
-                    hit++;
-                    break;
-                }
-            }
-            if(search == -1)
-            {
-             if(isFull)
-             {
-              int min_loc = ref_len;
-                    for(int j = 0; j < frames; j++)
-                    {
-                     if(stack.contains(buffer[j]))
-                        {
-                            int temp = stack.indexOf(buffer[j]);
-                            if(temp < min_loc)
-                            {
-                                min_loc = temp;
-                                pointer = j;
-                            }
-                        }
-                    }
-             }
-                buffer[pointer] = reference[i];
-                fault++;
-                pointer++;
-                if(pointer == frames)
-                {
-                 pointer = 0;
-                 isFull = true;
-                }
-            }
-            for(int j = 0; j < frames; j++)
-                mem_layout[i][j] = buffer[j];
+            System.out.println("Queue: " + lru_list);
+            System.out.println("---------------------------");
         }
-        
-        for(int i = 0; i < frames; i++)
-        {
-            for(int j = 0; j < ref_len; j++)
-                System.out.printf("%3d ",mem_layout[j][i]);
-            System.out.println();
-        }
-        
-        System.out.println("The number of Hits: " + hit);
-        System.out.println("Hit Ratio: " + (float)((float)hit/ref_len));
-        System.out.println("The number of Faults: " + fault);
+        miss = n - hits;
+        System.out.println("\nHit Ratio: " + (int) hits + "/" + n + " = " + Math.round((hits / n) * deci) / deci);
+        System.out.println("Miss Ratio: " + (int) miss + "/" + n + " = " + Math.round((miss / n) * deci) / deci);
+        System.out.println("\n---------------------------");
     }
-    
+
+    public static void main(String args[]) {
+        int page_order[] = { 7, 0, 1, 2, 0, 3, 0, 4, 2, 3, 0, 3, 2, 3 };
+        int page_frame = 4;
+        lru_page_replace(page_order, page_frame);
+    }
 }
